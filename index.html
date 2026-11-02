@@ -133,7 +133,8 @@ header.top h1 { font-size: 17px; margin: 0; flex: 1; text-align: center; white-s
 .controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; margin: 10px 0; }
 
 .viewer { overflow: auto; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
-.viewer img { display: block; width: 100%; height: auto; background: #fff; }
+/* Whitens the yellowed scans: white paper, black ink */
+.viewer img { display: block; width: 100%; height: auto; background: #fff; filter: grayscale(1) brightness(1.18) contrast(1.9); }
 .viewer.zoomed img { width: 220%; max-width: none; }
 .status { padding: 40px 16px; text-align: center; color: var(--muted); }
 .zoom-hint { font-size: 12px; color: var(--muted); text-align: center; margin: 6px 0 0; }
