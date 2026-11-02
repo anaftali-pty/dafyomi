@@ -173,6 +173,18 @@ header.top h1 { font-size: 19px; font-weight: 700; margin: 0; flex: 1; text-alig
   font-size: 19px; font-weight: 700; margin: 10px 0; box-shadow: 0 3px 8px rgba(0,0,0,.35);
 }
 .listen-btn svg { width: 20px; height: 20px; }
+.dl-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 0 0 10px;
+  border: 1px solid var(--gold); border-radius: 4px; padding: 9px 10px; background: var(--panel);
+  color: var(--gold-light); font-size: 16px; font-weight: 700; position: relative; overflow: hidden;
+}
+.dl-btn svg { width: 18px; height: 18px; flex: none; }
+.dl-btn .fill { position: absolute; inset: 0 auto 0 0; background: rgba(201,162,78,.28); transition: width .2s; }
+.dl-btn span { position: relative; }
+.dl-btn.saved { color: var(--text-strong); }
+.dl-btn.saved small { color: var(--muted); font-weight: 600; }
+.daf.offline::before { content: "⤓"; position: absolute; bottom: 2px; left: 5px; font-size: 12px; line-height: 1; }
+.offline-note { margin: 16px 0 0; padding: 9px 12px; text-align: center; font-size: 15px; color: var(--text-strong); }
 
 /* mini player */
 .player {
@@ -486,8 +498,21 @@ function renderHome() {
   const showCont = cont && cont.guid !== latest?.guid && !isDone(cont);
 
   let html = `<section class="hero"><div class="medal">ד</div><h2 class="heb gold-text">תלמוד בבלי</h2><p>Daf Yomi · Marco Kassab</p></section>`;
+  if (!navigator.onLine) html += `<div class="plate offline-note">Sin conexión · puedes usar tus clases descargadas</div>`;
   if (latest) html += todayCard(latest, "Clase de hoy");
   if (showCont) html += todayCard(cont, "Continuar escuchando");
+
+  const saved = orderedLessons().filter(isDownloaded);
+  if (saved.length) {
+    html += `<div class="seder"><span><span class="heb">הורדות</span><small>Mis descargas</small></span></div><div class="labels">`;
+    saved.forEach((l, i) => {
+      const d = downloads[l.guid];
+      const wide = saved.length % 2 === 1 && i === saved.length - 1;
+      html += `<a class="lab ${wide ? "wide" : ""}" href="${lessonHref(l)}"><div class="es">${esc(lessonLabel(l))}</div>
+        <div class="n">${d.audio ? "Audio y páginas" : "Páginas"}${d.bytes ? " · " + fmtSize(d.bytes) : ""}</div></a>`;
+    });
+    html += `</div>`;
+  }
 
   const sedarim = [];
   for (const m of MASECHTOT) {
@@ -550,7 +575,7 @@ function renderMas(m) {
   let html = `<section class="hero small"><h2 class="heb gold-text">${esc(m.he)}</h2>
     <p>Masejet ${esc(m.name)} · ${list.length} clases · ${list.filter(isDone).length} escuchadas</p></section><div class="grid">`;
   for (const l of list) {
-    const cls = [isDone(l) ? "done" : "", isPartial(l) ? "partial" : "", l.guid === curGuid ? "current" : ""].join(" ");
+    const cls = [isDone(l) ? "done" : "", isPartial(l) ? "partial" : "", l.guid === curGuid ? "current" : "", isDownloaded(l) ? "offline" : ""].join(" ");
     const r = dafRange(l);
     html += `<a class="daf ${cls}" href="${lessonHref(l)}">${esc(r.length > 4 ? l.daf : r)}${r.length > 4 ? `<small>${esc(r)}</small>` : ""}</a>`;
   }
@@ -587,6 +612,7 @@ function renderLesson(l) {
       </div>
     </div>
     <button class="listen-btn" id="listenBtn">${playing ? ICONS.pause + "Pausar clase" : ICONS.play + (isPartial(l) ? "Continuar clase" : "Escuchar clase")}</button>
+    <button class="dl-btn" id="dlBtn"></button>
     ${amudim.length ? `
     <div class="controls">
       <div class="seg" id="amudSeg">${amudim.map(a => `<button data-a="${a}" class="${a === state.amud ? "on" : ""}">${amudLabel(a)}</button>`).join("")}</div>
@@ -604,6 +630,12 @@ function renderLesson(l) {
     ${footer()}`;
 
   $("listenBtn").onclick = () => player.toggle(l);
+  $("dlBtn").onclick = () => {
+    if (dlProgress.has(l.guid)) return;
+    if (!isDownloaded(l)) return downloadLesson(l);
+    if (confirm(`¿Borrar la descarga de ${lessonLabel(l)}?`)) removeDownload(l).then(() => updateDlUi(l));
+  };
+  updateDlUi(l);
   $("prevBtn").onclick = () => prev && (location.hash = lessonHref(prev));
   $("nextBtn").onclick = () => next && (location.hash = lessonHref(next));
   if (!amudim.length) return;
@@ -626,11 +658,21 @@ function renderLesson(l) {
 
 function sefRef(l, amud) { return l.mas.sef + " " + amud; }
 
+function manuscriptsUrl(ref) { return `${SEFARIA}/api/manuscripts/${encodeURIComponent(ref)}`; }
+function textUrl(ref) { return `${SEFARIA}/api/v3/texts/${encodeURIComponent(ref)}?version=hebrew&version=english&return_format=text_only`; }
+
+// Downloaded lessons keep their Sefaria data in the offline cache; read it from there first.
+async function cachedJSON(url) {
+  const c = await openOfflineCache();
+  const hit = c && await c.match(url);
+  const res = hit || await fetch(url);
+  return res.ok ? res.json() : null;
+}
+
 const imgCache = new Map();
 async function findPageImage(ref) {
   if (imgCache.has(ref)) return imgCache.get(ref);
-  const res = await fetch(`${SEFARIA}/api/manuscripts/${encodeURIComponent(ref)}`);
-  const list = res.ok ? await res.json() : [];
+  const list = await cachedJSON(manuscriptsUrl(ref));
   const pick = Array.isArray(list)
     ? (list.find(x => /vilna/i.test(x.manuscript?.slug || "")) || list.find(x => /bomberg/i.test(x.manuscript?.slug || "")))
     : null;
@@ -669,9 +711,8 @@ async function showImage(l, amud) {
 const textCache = new Map();
 async function fetchText(ref) {
   if (textCache.has(ref)) return textCache.get(ref);
-  const res = await fetch(`${SEFARIA}/api/v3/texts/${encodeURIComponent(ref)}?version=hebrew&version=english&return_format=text_only`);
-  if (!res.ok) throw new Error(res.status);
-  const data = await res.json();
+  const data = await cachedJSON(textUrl(ref));
+  if (!data) throw new Error("no text");
   const he = data.versions?.find(v => v.language === "he");
   const en = data.versions?.find(v => v.language === "en");
   const out = { he: flat(he?.text), en: flat(en?.text), heTitle: he?.versionTitle, enTitle: en?.versionTitle };
@@ -717,6 +758,117 @@ function footer() {
   return `<p class="foot">Audio: podcast “Marco Kassab – Daf Yomi”.<br>Páginas y texto del Talmud: <a href="https://www.sefaria.org" target="_blank" rel="noopener">Sefaria</a> (edición Vilna).</p>`;
 }
 
+// ---------- offline downloads ----------
+// The podcast CDN doesn't allow cross-site downloads, so audio goes through a small
+// Cloudflare Worker that adds CORS headers. Without it, only pages and texts are saved.
+const AUDIO_PROXY = "https://dafyomi-audio.anaftali.workers.dev";
+const OFFLINE_CACHE = "dy-offline";
+let downloads = store.get("dy.downloads", {}); // guid -> {at, bytes, audio}
+const dlProgress = new Map();                  // guid -> 0..1 while downloading
+const offlineUrls = new Map();                 // guid -> blob: URL of the saved audio
+
+function isDownloaded(l) { return !!downloads[l.guid]; }
+function audioKey(l) { return new URL("offline-audio/" + encodeURIComponent(l.guid), location.href).href; }
+function openOfflineCache() { return "caches" in window ? caches.open(OFFLINE_CACHE).catch(() => null) : Promise.resolve(null); }
+function fmtSize(b) { return b > 1e6 ? Math.round(b / 1e6) + " MB" : Math.max(1, Math.round(b / 1e3)) + " KB"; }
+
+// Blob URLs are made up front so playback can start synchronously inside the tap
+// (iOS blocks play() after an await).
+async function prepareOfflineAudio() {
+  const c = await openOfflineCache();
+  if (!c) return;
+  for (const guid of Object.keys(downloads)) {
+    if (!downloads[guid].audio || offlineUrls.has(guid)) continue;
+    const hit = await c.match(audioKey({ guid }));
+    if (hit) offlineUrls.set(guid, URL.createObjectURL(await hit.blob()));
+  }
+}
+
+async function downloadLesson(l) {
+  const c = await openOfflineCache();
+  if (!c) { alert("Este navegador no permite descargas."); return; }
+  dlProgress.set(l.guid, 0);
+  updateDlUi(l);
+  let bytes = 0, hasAudio = false;
+  try {
+    navigator.storage?.persist?.().catch(() => {});
+    for (const a of l.amudim || []) {
+      const ref = sefRef(l, a);
+      for (const u of [manuscriptsUrl(ref), textUrl(ref)]) {
+        const r = await fetch(u);
+        if (r.ok) await c.put(u, r);
+      }
+      const img = await findPageImage(ref);
+      if (img) await c.put(img.url, await fetch(img.url, { mode: "no-cors" }));
+    }
+    if (AUDIO_PROXY) {
+      const res = await fetch(AUDIO_PROXY + "/?url=" + encodeURIComponent(l.url));
+      if (!res.ok) throw new Error("audio " + res.status);
+      const total = +res.headers.get("Content-Length") || 0;
+      const reader = res.body.getReader(), chunks = [];
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        bytes += value.length;
+        if (total) { dlProgress.set(l.guid, bytes / total); updateDlUi(l); }
+      }
+      const type = res.headers.get("Content-Type") || "audio/mp4";
+      const blob = new Blob(chunks, { type });
+      await c.put(audioKey(l), new Response(blob, { headers: { "Content-Type": type } }));
+      offlineUrls.set(l.guid, URL.createObjectURL(blob));
+      hasAudio = true;
+    }
+    downloads[l.guid] = { at: Date.now(), bytes, audio: hasAudio };
+    store.set("dy.downloads", downloads);
+  } catch {
+    await removeDownload(l);
+    alert("No se pudo descargar. Revisa tu conexión e intenta de nuevo.");
+  } finally {
+    dlProgress.delete(l.guid);
+    updateDlUi(l);
+  }
+}
+
+async function removeDownload(l) {
+  const c = await openOfflineCache();
+  if (c) {
+    await c.delete(audioKey(l));
+    for (const a of l.amudim || []) {
+      const ref = sefRef(l, a);
+      const img = await findPageImage(ref).catch(() => null);
+      if (img) await c.delete(img.url);
+      await c.delete(manuscriptsUrl(ref));
+      await c.delete(textUrl(ref));
+    }
+  }
+  if (offlineUrls.has(l.guid) && player.current?.guid !== l.guid) {
+    URL.revokeObjectURL(offlineUrls.get(l.guid));
+    offlineUrls.delete(l.guid);
+  }
+  delete downloads[l.guid];
+  store.set("dy.downloads", downloads);
+}
+
+const DL_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>';
+function updateDlUi(l) {
+  const b = $("dlBtn");
+  if (!b || route().id !== l.guid) return;
+  const d = downloads[l.guid];
+  b.classList.toggle("saved", !!d);
+  if (dlProgress.has(l.guid)) {
+    const pct = Math.round(dlProgress.get(l.guid) * 100);
+    b.innerHTML = `<i class="fill" style="width:${pct}%"></i><span>Descargando… ${pct ? pct + "%" : ""}</span>`;
+  } else if (d) {
+    b.innerHTML = `<span>✓ ${d.audio ? "Descargada" : "Páginas descargadas"} <small>· ${d.audio ? fmtSize(d.bytes) : "el audio necesita internet"} · Borrar</small></span>`;
+  } else {
+    b.innerHTML = DL_ICON + `<span>${AUDIO_PROXY ? "Descargar para usar sin internet" : "Descargar páginas para ver sin internet"}</span>`;
+  }
+}
+
+window.addEventListener("online", render);
+window.addEventListener("offline", render);
+
 // ---------- player ----------
 const audio = $("audio");
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
@@ -727,7 +879,7 @@ const player = {
   load(l, autoplay) {
     this.current = l;
     store.set("dy.last", l.guid);
-    audio.src = l.url;
+    audio.src = offlineUrls.get(l.guid) || l.url;
     audio.playbackRate = this.speed;
     const saved = progress[l.guid];
     const startAt = saved && !saved.done ? saved.t : 0;
@@ -844,7 +996,7 @@ function restoreLast() {
   const l = g && byGuid.get(g);
   if (l && !player.current) {
     player.current = l;
-    audio.src = l.url;
+    audio.src = offlineUrls.get(l.guid) || l.url;
     audio.playbackRate = player.speed;
     const saved = progress[l.guid];
     if (saved && !saved.done && saved.t) {
@@ -859,11 +1011,11 @@ function restoreLast() {
   }
 }
 
-if ("serviceWorker" in navigator && location.protocol === "https:") {
+if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
   navigator.serviceWorker.register("sw.js").catch(() => {});
 }
 
-loadFeed(false).then(restoreLast);
+loadFeed(false).then(prepareOfflineAudio).then(restoreLast);
 </script>
 </body>
 </html>
