@@ -1,0 +1,846 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Daf Yomi Marco Kassab</title>
+<meta name="description" content="Las clases del Daf Yomi en español de Marco Kassab, organizadas por masejet, con la página del daf.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Daf Yomi">
+<meta name="theme-color" content="#1d3557">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>
+:root {
+  --bg: #f6f3ec;
+  --surface: #ffffff;
+  --surface-2: #efeadf;
+  --text: #1f2328;
+  --muted: #6b6f76;
+  --border: #e2dccf;
+  --accent: #1d3557;
+  --accent-text: #ffffff;
+  --gold: #b8892b;
+  --done: #2f855a;
+  --shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14161a;
+    --surface: #1d2026;
+    --surface-2: #262a31;
+    --text: #eceae4;
+    --muted: #9a9ea6;
+    --border: #2f343c;
+    --accent: #8fb3e8;
+    --accent-text: #0f1520;
+    --gold: #d9ad55;
+    --done: #5cc58e;
+    --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14161a; --surface: #1d2026; --surface-2: #262a31; --text: #eceae4; --muted: #9a9ea6;
+  --border: #2f343c; --accent: #8fb3e8; --accent-text: #0f1520; --gold: #d9ad55; --done: #5cc58e; --shadow: none;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  -webkit-text-size-adjust: 100%;
+  padding-bottom: calc(150px + env(safe-area-inset-bottom));
+}
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
+a { color: var(--accent); }
+.wrap { max-width: 760px; margin: 0 auto; padding: 0 16px; }
+
+header.top {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding-top: env(safe-area-inset-top);
+}
+header.top .wrap { display: flex; align-items: center; gap: 8px; height: 52px; }
+header.top h1 { font-size: 17px; margin: 0; flex: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; color: var(--accent); }
+.icon-btn svg { width: 22px; height: 22px; }
+.icon-btn[hidden] { visibility: hidden; display: grid; }
+
+.hero { padding: 20px 0 8px; }
+.hero h2 { margin: 0; font-size: 28px; letter-spacing: -.01em; }
+.hero p { margin: 4px 0 0; color: var(--muted); }
+
+.card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+  box-shadow: var(--shadow);
+}
+.today { display: flex; align-items: center; gap: 14px; padding: 14px; margin: 14px 0; }
+.today .label { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--gold); font-weight: 600; }
+.today .title { font-size: 19px; font-weight: 600; }
+.today .sub { color: var(--muted); font-size: 14px; }
+.today .grow { flex: 1; min-width: 0; cursor: pointer; }
+.play-circle {
+  width: 52px; height: 52px; border-radius: 50%; background: var(--accent); color: var(--accent-text);
+  display: grid; place-items: center; flex: none;
+}
+.play-circle svg { width: 24px; height: 24px; }
+
+.seder { margin: 26px 0 8px; display: flex; align-items: baseline; justify-content: space-between; }
+.seder h3 { margin: 0; font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.seder span { font-family: "Times New Roman", serif; color: var(--muted); font-size: 16px; }
+.list { overflow: hidden; }
+.row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px; width: 100%; text-align: left;
+  border-top: 1px solid var(--border);
+}
+.row:first-child { border-top: 0; }
+.row .name { font-weight: 600; }
+.row .meta { font-size: 13px; color: var(--muted); }
+.row .heb { font-family: "Times New Roman", "SBL Hebrew", serif; font-size: 20px; color: var(--muted); direction: rtl; }
+.row .grow { flex: 1; min-width: 0; }
+.row.disabled { opacity: .45; }
+.bar { height: 4px; border-radius: 2px; background: var(--surface-2); margin-top: 6px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--gold); }
+.chev { color: var(--muted); width: 16px; height: 16px; flex: none; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 8px; margin: 16px 0; }
+.daf {
+  aspect-ratio: 1; border-radius: 12px; background: var(--surface); border: 1px solid var(--border);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative;
+  font-weight: 600; font-size: 18px;
+}
+.daf small { font-size: 11px; font-weight: 500; color: var(--muted); }
+.daf.done { background: color-mix(in srgb, var(--done) 14%, var(--surface)); border-color: color-mix(in srgb, var(--done) 45%, var(--border)); }
+.daf.done::after { content: "✓"; position: absolute; top: 4px; right: 7px; font-size: 11px; color: var(--done); }
+.daf.partial::after { content: ""; position: absolute; top: 7px; right: 7px; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.daf.current { outline: 2px solid var(--accent); outline-offset: 1px; }
+.daf.missing { opacity: .35; }
+
+.lesson-head { display: flex; align-items: center; gap: 12px; padding: 16px 0 6px; }
+.lesson-head .grow { flex: 1; }
+.lesson-head h2 { margin: 0; font-size: 24px; }
+.lesson-head p { margin: 2px 0 0; color: var(--muted); font-size: 14px; }
+
+.seg { display: inline-flex; background: var(--surface-2); border-radius: 10px; padding: 3px; gap: 2px; }
+.seg button { padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 500; color: var(--muted); }
+.seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; margin: 10px 0; }
+
+.viewer { overflow: auto; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); -webkit-overflow-scrolling: touch; }
+.viewer img { display: block; width: 100%; height: auto; background: #fff; }
+.viewer.zoomed img { width: 220%; max-width: none; }
+.status { padding: 40px 16px; text-align: center; color: var(--muted); }
+.zoom-hint { font-size: 12px; color: var(--muted); text-align: center; margin: 6px 0 0; }
+
+.text { padding: 16px; }
+.text .he { direction: rtl; font-family: "Times New Roman", "SBL Hebrew", serif; font-size: 21px; line-height: 1.7; margin: 0 0 14px; }
+.text .en { font-size: 15px; color: var(--muted); margin: -6px 0 18px; }
+.text .credit { font-size: 12px; color: var(--muted); border-top: 1px solid var(--border); padding-top: 10px; margin-top: 10px; }
+
+.nav { display: flex; gap: 10px; margin: 16px 0; }
+.nav button { flex: 1; padding: 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--border); font-weight: 500; }
+.nav button:disabled { opacity: .4; }
+
+.listen-btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  background: var(--accent); color: var(--accent-text); border-radius: 12px; padding: 12px; font-weight: 600; margin: 8px 0;
+}
+.listen-btn svg { width: 20px; height: 20px; }
+
+/* mini player */
+.player {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid var(--border);
+  padding: 10px 0 calc(10px + env(safe-area-inset-bottom));
+}
+.player[hidden] { display: none; }
+.player .wrap { display: flex; flex-direction: column; gap: 6px; }
+.p-top { display: flex; align-items: center; gap: 10px; }
+.p-title { flex: 1; min-width: 0; cursor: pointer; }
+.p-title b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-title span { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.p-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; position: relative; }
+.p-btn svg { width: 26px; height: 26px; }
+.p-btn.main { background: var(--accent); color: var(--accent-text); width: 46px; height: 46px; }
+.p-btn .n { position: absolute; font-size: 9px; font-weight: 700; top: 50%; left: 50%; transform: translate(-50%, -38%); }
+.speed { font-size: 13px; font-weight: 700; padding: 6px 8px; border-radius: 8px; background: var(--surface-2); min-width: 46px; }
+.p-bottom { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.p-bottom input { flex: 1; accent-color: var(--accent); }
+
+.foot { color: var(--muted); font-size: 12px; text-align: center; margin: 30px 0 10px; }
+.spinner { width: 26px; height: 26px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <button class="icon-btn" id="backBtn" aria-label="Atrás" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </button>
+    <h1 id="topTitle">Daf Yomi</h1>
+    <button class="icon-btn" id="refreshBtn" aria-label="Actualizar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+    </button>
+  </div>
+</header>
+
+<main class="wrap" id="app">
+  <div class="status"><div class="spinner"></div>Cargando clases…</div>
+</main>
+
+<div class="player" id="player" hidden>
+  <div class="wrap">
+    <div class="p-top">
+      <div class="p-title" id="pTitle"><b>—</b><span>Marco Kassab</span></div>
+      <button class="p-btn" id="pBack" aria-label="Atrás 15 segundos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v4h4"/></svg><span class="n">15</span>
+      </button>
+      <button class="p-btn main" id="pPlay" aria-label="Reproducir"></button>
+      <button class="p-btn" id="pFwd" aria-label="Adelantar 30 segundos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4h-4"/></svg><span class="n">30</span>
+      </button>
+      <button class="speed" id="pSpeed" aria-label="Velocidad">1×</button>
+    </div>
+    <div class="p-bottom">
+      <span id="pCur">0:00</span>
+      <input type="range" id="pSeek" min="0" max="1000" value="0" aria-label="Posición">
+      <span id="pDur">0:00</span>
+    </div>
+  </div>
+</div>
+
+<audio id="audio" preload="metadata"></audio>
+
+<script>
+"use strict";
+
+const FEED_URL = "https://anchor.fm/s/11f8e678/podcast/rss";
+const SEFARIA = "https://www.sefaria.org";
+
+// Talmud Bavli in Daf Yomi order. `aliases` are the spellings used in the podcast titles
+// (and likely future ones), compared after normalizing.
+const MASECHTOT = [
+  { seder: "Zeraim", sederHe: "זרעים", name: "Berajot", he: "ברכות", sef: "Berakhot", last: 64 },
+  { seder: "Moed", sederHe: "מועד", name: "Shabat", he: "שבת", sef: "Shabbat", last: 157 },
+  { seder: "Moed", name: "Eruvin", he: "עירובין", sef: "Eruvin", last: 105 },
+  { seder: "Moed", name: "Pesajim", he: "פסחים", sef: "Pesachim", last: 121 },
+  { seder: "Moed", name: "Shekalim", he: "שקלים", sef: "Shekalim", last: 22 },
+  { seder: "Moed", name: "Yoma", he: "יומא", sef: "Yoma", last: 88 },
+  { seder: "Moed", name: "Suca", he: "סוכה", sef: "Sukkah", last: 56, aliases: ["Suka", "Sucá"] },
+  { seder: "Moed", name: "Beitza", he: "ביצה", sef: "Beitzah", last: 40, aliases: ["Beitzá"] },
+  { seder: "Moed", name: "Rosh Hashana", he: "ראש השנה", sef: "Rosh Hashanah", last: 35 },
+  { seder: "Moed", name: "Taanit", he: "תענית", sef: "Taanit", last: 31 },
+  { seder: "Moed", name: "Meguila", he: "מגילה", sef: "Megillah", last: 32 },
+  { seder: "Moed", name: "Moed Katan", he: "מועד קטן", sef: "Moed Katan", last: 29 },
+  { seder: "Moed", name: "Jaguiga", he: "חגיגה", sef: "Chagigah", last: 27, aliases: ["Jagiga"] },
+  { seder: "Nashim", sederHe: "נשים", name: "Yebamot", he: "יבמות", sef: "Yevamot", last: 122, aliases: ["Yevamot"] },
+  { seder: "Nashim", name: "Ketubot", he: "כתובות", sef: "Ketubot", last: 112 },
+  { seder: "Nashim", name: "Nedarim", he: "נדרים", sef: "Nedarim", last: 91 },
+  { seder: "Nashim", name: "Nazir", he: "נזיר", sef: "Nazir", last: 66 },
+  { seder: "Nashim", name: "Sota", he: "סוטה", sef: "Sotah", last: 49 },
+  { seder: "Nashim", name: "Gitin", he: "גיטין", sef: "Gittin", last: 90 },
+  { seder: "Nashim", name: "Kidushin", he: "קידושין", sef: "Kiddushin", last: 82 },
+  { seder: "Nezikin", sederHe: "נזיקין", name: "Baba Kama", he: "בבא קמא", sef: "Bava Kamma", last: 119, aliases: ["Bava Kama"] },
+  { seder: "Nezikin", name: "Baba Metzia", he: "בבא מציעא", sef: "Bava Metzia", last: 119, aliases: ["Bava Metzia"] },
+  { seder: "Nezikin", name: "Baba Batra", he: "בבא בתרא", sef: "Bava Batra", last: 176, aliases: ["Bava Batra"] },
+  { seder: "Nezikin", name: "Sanhedrin", he: "סנהדרין", sef: "Sanhedrin", last: 113 },
+  { seder: "Nezikin", name: "Makot", he: "מכות", sef: "Makkot", last: 24 },
+  { seder: "Nezikin", name: "Shevuot", he: "שבועות", sef: "Shevuot", last: 49 },
+  { seder: "Nezikin", name: "Avoda Zara", he: "עבודה זרה", sef: "Avodah Zarah", last: 76 },
+  { seder: "Nezikin", name: "Horayot", he: "הוריות", sef: "Horayot", last: 14 },
+  { seder: "Kodashim", sederHe: "קדשים", name: "Zevajim", he: "זבחים", sef: "Zevachim", last: 120 },
+  { seder: "Kodashim", name: "Menajot", he: "מנחות", sef: "Menachot", last: 110 },
+  { seder: "Kodashim", name: "Julin", he: "חולין", sef: "Chullin", last: 142 },
+  { seder: "Kodashim", name: "Bejorot", he: "בכורות", sef: "Bekhorot", last: 61 },
+  { seder: "Kodashim", name: "Arajin", he: "ערכין", sef: "Arakhin", last: 34, aliases: ["Arakhin", "Erajin"] },
+  { seder: "Kodashim", name: "Temura", he: "תמורה", sef: "Temurah", last: 34, aliases: ["Temurá"] },
+  { seder: "Kodashim", name: "Keritot", he: "כריתות", sef: "Keritot", last: 28, aliases: ["Kritot", "Kerithot"] },
+  { seder: "Kodashim", name: "Meila", he: "מעילה", sef: "Meilah", last: 22, aliases: ["Meilá"] },
+  { seder: "Kodashim", name: "Kinim", he: "קינים", sef: "Meilah", first: 22, last: 25, aliases: ["Kinnim", "Kinin"] },
+  { seder: "Kodashim", name: "Tamid", he: "תמיד", sef: "Tamid", first: 25, last: 33 },
+  { seder: "Kodashim", name: "Midot", he: "מידות", sef: "Tamid", first: 34, last: 37, aliases: ["Middot", "Midos"] },
+  { seder: "Tahorot", sederHe: "טהרות", name: "Nida", he: "נדה", sef: "Niddah", last: 73, aliases: ["Nidda", "Niddah", "Nidá"] },
+];
+MASECHTOT.forEach((m, i) => { m.idx = i; m.slug = slugify(m.name); m.first = m.first || 2; });
+
+function norm(s) {
+  return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+function slugify(s) { return norm(s); }
+const ALIAS = new Map();
+MASECHTOT.forEach(m => [m.name, ...(m.aliases || [])].forEach(a => ALIAS.set(norm(a), m)));
+
+// ---------- storage ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+let progress = store.get("dy.progress", {}); // guid -> {t: seconds, d: duration, done: bool}
+function saveProgress() { store.set("dy.progress", progress); }
+
+// ---------- feed parsing ----------
+// "Berajot 2" | "Shabat 37-38A" | "Shekalim 2 y 3A" | "Shekalim 3B y 4"
+const TITLE_RE = /^(.+?)\s+(\d+)\s*([ab])?(?:\s*(?:-|–|y|al)\s*(\d+)\s*([ab])?)?\s*$/i;
+
+function parseTitle(title) {
+  const m = title.trim().match(TITLE_RE);
+  if (!m) return null;
+  const mas = ALIAS.get(norm(m[1]));
+  if (!mas) return null;
+  const sDaf = +m[2], sAmud = (m[3] || "a").toLowerCase();
+  const eDaf = m[4] ? +m[4] : sDaf;
+  const eAmud = m[4] ? (m[5] || "b").toLowerCase() : (m[3] ? sAmud : "b");
+  const amudim = [];
+  for (let d = sDaf; d <= eDaf; d++) {
+    for (const a of ["a", "b"]) {
+      if (d === sDaf && a === "a" && sAmud === "b") continue;
+      if (d === eDaf && a === "b" && eAmud === "a") continue;
+      amudim.push(d + a);
+    }
+  }
+  return { mas, daf: sDaf, endDaf: eDaf, amudim };
+}
+
+function parseFeed(xmlText) {
+  const doc = new DOMParser().parseFromString(xmlText, "application/xml");
+  const items = [...doc.querySelectorAll("item")];
+  const eps = [];
+  for (const it of items) {
+    const title = (it.querySelector("title")?.textContent || "").trim();
+    const enc = it.querySelector("enclosure");
+    if (!enc) continue;
+    const guid = (it.querySelector("guid")?.textContent || enc.getAttribute("url")).trim();
+    const dur = it.getElementsByTagName("itunes:duration")[0]?.textContent || "";
+    eps.push({
+      guid, title,
+      url: enc.getAttribute("url"),
+      date: Date.parse(it.querySelector("pubDate")?.textContent || "") || 0,
+      dur: parseDuration(dur),
+    });
+  }
+  return eps;
+}
+function parseDuration(s) {
+  if (!s) return 0;
+  if (/^\d+$/.test(s)) return +s;
+  return s.split(":").reduce((acc, p) => acc * 60 + (+p || 0), 0);
+}
+
+// ---------- model ----------
+let episodes = [];       // newest first, as in the feed
+let byMas = new Map();   // mas.idx -> lessons sorted by daf
+let others = [];
+let byGuid = new Map();
+
+function buildModel(eps) {
+  episodes = eps;
+  byMas = new Map(); others = []; byGuid = new Map();
+  for (const ep of eps) {
+    const p = parseTitle(ep.title);
+    const lesson = { ...ep, ...(p || {}) };
+    byGuid.set(ep.guid, lesson);
+    if (!p) { others.push(lesson); continue; }
+    if (!byMas.has(p.mas.idx)) byMas.set(p.mas.idx, []);
+    byMas.get(p.mas.idx).push(lesson);
+  }
+  for (const list of byMas.values()) list.sort((a, b) => a.daf - b.daf || a.date - b.date);
+}
+
+// Lessons in study order, across masechtot.
+function orderedLessons() {
+  const out = [];
+  MASECHTOT.forEach(m => out.push(...(byMas.get(m.idx) || [])));
+  return out;
+}
+function neighbors(lesson) {
+  const all = orderedLessons();
+  const i = all.findIndex(l => l.guid === lesson.guid);
+  return { prev: all[i - 1], next: all[i + 1] };
+}
+
+async function loadFeed(force) {
+  const cached = store.get("dy.feed", null);
+  if (cached && !force) {
+    buildModel(cached.eps);
+    render();
+  }
+  try {
+    const res = await fetch(FEED_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error(res.status);
+    const eps = parseFeed(await res.text());
+    if (eps.length) {
+      store.set("dy.feed", { at: Date.now(), eps });
+      buildModel(eps);
+      render();
+    }
+  } catch (e) {
+    if (!episodes.length) {
+      app.innerHTML = `<div class="status">No se pudieron cargar las clases.<br>Revisa tu conexión e intenta de nuevo.<br><br><button class="listen-btn" onclick="loadFeed(true)">Reintentar</button></div>`;
+    }
+  }
+}
+
+// ---------- helpers ----------
+const app = document.getElementById("app");
+const $ = id => document.getElementById(id);
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function fmt(t) {
+  t = Math.max(0, Math.floor(t || 0));
+  const h = Math.floor(t / 3600), m = Math.floor(t / 60) % 60, s = t % 60;
+  return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(s).padStart(2, "0");
+}
+function fmtDate(ms) {
+  return ms ? new Date(ms).toLocaleDateString("es", { day: "numeric", month: "short", year: "numeric" }) : "";
+}
+function lessonLabel(l) {
+  if (!l.mas) return l.title;
+  return l.mas.name + " " + dafRange(l);
+}
+function dafRange(l) {
+  const a = l.amudim, first = a[0], last = a[a.length - 1];
+  const whole = first.endsWith("a") && last.endsWith("b");
+  if (whole && l.daf === l.endDaf) return String(l.daf);
+  if (whole) return l.daf + "–" + l.endDaf;
+  return first + (a.length > 1 ? "–" + last : "");
+}
+function amudLabel(a) { return a.slice(0, -1) + (a.endsWith("a") ? "a" : "b"); }
+function isDone(l) { return !!progress[l.guid]?.done; }
+function isPartial(l) { const p = progress[l.guid]; return p && !p.done && p.t > 30; }
+
+const ICONS = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>',
+  pause: '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+};
+
+// ---------- routing ----------
+window.addEventListener("hashchange", render);
+$("backBtn").onclick = () => {
+  const r = route();
+  if (r.view === "lesson") {
+    const l = byGuid.get(r.id);
+    location.hash = l?.mas ? "#/m/" + l.mas.slug : "#/";
+  } else location.hash = "#/";
+};
+$("refreshBtn").onclick = () => loadFeed(true);
+
+function route() {
+  const parts = location.hash.replace(/^#\/?/, "").split("/").map(decodeURIComponent);
+  if (parts[0] === "m" && parts[1]) return { view: "mas", id: parts[1] };
+  if (parts[0] === "l" && parts[1]) return { view: "lesson", id: parts.slice(1).join("/") };
+  if (parts[0] === "otros") return { view: "others" };
+  return { view: "home" };
+}
+
+let lastView = "";
+function render() {
+  if (!episodes.length) return;
+  const r = route();
+  const key = r.view + ":" + (r.id || "");
+  if (key !== lastView) window.scrollTo(0, 0);
+  lastView = key;
+  $("backBtn").hidden = r.view === "home";
+  if (r.view === "mas") return renderMas(MASECHTOT.find(m => m.slug === r.id));
+  if (r.view === "lesson") return renderLesson(byGuid.get(r.id));
+  if (r.view === "others") return renderOthers();
+  renderHome();
+}
+function lessonHref(l) { return "#/l/" + encodeURIComponent(l.guid); }
+
+// ---------- views ----------
+function renderHome() {
+  $("topTitle").textContent = "Daf Yomi";
+  const latest = orderedLessons().reduce((a, b) => (!a || b.date > a.date ? b : a), null);
+  const lastGuid = store.get("dy.last", null);
+  const cont = lastGuid && byGuid.get(lastGuid);
+  const showCont = cont && cont.guid !== latest?.guid && !isDone(cont);
+
+  let html = `<section class="hero"><h2>Daf Yomi</h2><p>Marco Kassab · clases en español</p></section>`;
+  if (latest) html += todayCard(latest, "Clase de hoy");
+  if (showCont) html += todayCard(cont, "Continuar escuchando");
+
+  let seder = null, open = false;
+  for (const m of MASECHTOT) {
+    if (m.seder !== seder) {
+      if (open) html += `</div>`;
+      seder = m.seder;
+      html += `<div class="seder"><h3>Seder ${esc(m.seder)}</h3><span>${esc(m.sederHe)}</span></div><div class="card list">`;
+      open = true;
+    }
+    const list = byMas.get(m.idx) || [];
+    const total = m.last - m.first + 1;
+    const done = list.filter(isDone).length;
+    const meta = list.length
+      ? `${list.length} ${list.length === 1 ? "clase" : "clases"}${done ? ` · ${done} escuchadas` : ""}`
+      : "Próximamente";
+    const pct = Math.min(100, Math.round((list.length / total) * 100));
+    html += `<a class="row ${list.length ? "" : "disabled"}" ${list.length ? `href="#/m/${m.slug}"` : ""} style="color:inherit;text-decoration:none">
+      <div class="grow"><div class="name">${esc(m.name)}</div><div class="meta">${meta}</div>
+      <div class="bar"><i style="width:${pct}%"></i></div></div>
+      <div class="heb">${esc(m.he)}</div>${list.length ? ICONS.chev : ""}</a>`;
+  }
+  if (open) html += `</div>`;
+  if (others.length) {
+    html += `<div class="seder"><h3>Otras clases</h3></div><div class="card list">
+      <a class="row" href="#/otros" style="color:inherit;text-decoration:none"><div class="grow"><div class="name">Clases especiales</div><div class="meta">${others.length} clases</div></div>${ICONS.chev}</a></div>`;
+  }
+  html += footer();
+  app.innerHTML = html;
+  bindPlayButtons();
+}
+
+function todayCard(l, label) {
+  const p = progress[l.guid];
+  const sub = p?.t > 30 && !p.done ? `Vas en ${fmt(p.t)} de ${fmt(p.d || l.dur)}` : `${fmtDate(l.date)}${l.dur ? " · " + fmt(l.dur) : ""}`;
+  return `<div class="card today">
+    <div class="grow" onclick="location.hash='${lessonHref(l)}'">
+      <div class="label">${esc(label)}</div>
+      <div class="title">${esc(lessonLabel(l))}</div>
+      <div class="sub">${esc(sub)}</div>
+    </div>
+    <button class="play-circle" data-play="${esc(l.guid)}" aria-label="Reproducir">${ICONS.play}</button>
+  </div>`;
+}
+
+function bindPlayButtons() {
+  app.querySelectorAll("[data-play]").forEach(b => {
+    const l = byGuid.get(b.dataset.play);
+    b.innerHTML = player.current?.guid === l.guid && !audio.paused ? ICONS.pause : ICONS.play;
+    b.onclick = e => { e.stopPropagation(); player.toggle(l); };
+  });
+}
+
+function renderMas(m) {
+  if (!m) { location.hash = "#/"; return; }
+  $("topTitle").textContent = m.name;
+  const list = byMas.get(m.idx) || [];
+  const curGuid = player.current?.guid;
+  let html = `<section class="hero"><h2>${esc(m.name)} <span style="font-family:'Times New Roman',serif;color:var(--muted);font-weight:400">${esc(m.he)}</span></h2>
+    <p>${list.length} clases · ${list.filter(isDone).length} escuchadas · dafim ${m.first}–${m.last}</p></section><div class="grid">`;
+  for (const l of list) {
+    const cls = [isDone(l) ? "done" : "", isPartial(l) ? "partial" : "", l.guid === curGuid ? "current" : ""].join(" ");
+    const r = dafRange(l);
+    html += `<a class="daf ${cls}" href="${lessonHref(l)}" style="color:inherit;text-decoration:none">${esc(r.length > 4 ? l.daf : r)}${r.length > 4 ? `<small>${esc(r)}</small>` : ""}</a>`;
+  }
+  html += `</div>` + footer();
+  app.innerHTML = html;
+}
+
+function renderOthers() {
+  $("topTitle").textContent = "Clases especiales";
+  let html = `<div class="card list" style="margin-top:16px">`;
+  for (const l of others) {
+    html += `<a class="row" href="${lessonHref(l)}" style="color:inherit;text-decoration:none"><div class="grow"><div class="name">${esc(l.title)}</div><div class="meta">${fmtDate(l.date)}</div></div>${ICONS.chev}</a>`;
+  }
+  app.innerHTML = html + `</div>` + footer();
+}
+
+let viewMode = store.get("dy.view", "img"); // img | text
+let showEnglish = store.get("dy.en", false);
+let zoomed = false;
+
+function renderLesson(l) {
+  if (!l) { location.hash = "#/"; return; }
+  $("topTitle").textContent = lessonLabel(l);
+  const { prev, next } = neighbors(l);
+  const amudim = l.amudim || [];
+  const state = { amud: amudim[0] };
+  const playing = player.current?.guid === l.guid && !audio.paused;
+
+  app.innerHTML = `
+    <div class="lesson-head">
+      <div class="grow">
+        <h2>${esc(lessonLabel(l))}</h2>
+        <p>${l.mas ? "<bdi>" + esc(l.mas.he) + "</bdi> · " : ""}${fmtDate(l.date)}${l.dur ? " · " + fmt(l.dur) : ""}${isDone(l) ? " · ✓ escuchada" : ""}</p>
+      </div>
+    </div>
+    <button class="listen-btn" id="listenBtn">${playing ? ICONS.pause + "Pausar clase" : ICONS.play + (isPartial(l) ? "Continuar clase" : "Escuchar clase")}</button>
+    ${amudim.length ? `
+    <div class="controls">
+      <div class="seg" id="amudSeg">${amudim.map(a => `<button data-a="${a}" class="${a === state.amud ? "on" : ""}">${amudLabel(a)}</button>`).join("")}</div>
+      <div class="seg" id="modeSeg">
+        <button data-m="img" class="${viewMode === "img" ? "on" : ""}">Página</button>
+        <button data-m="text" class="${viewMode === "text" ? "on" : ""}">Texto</button>
+      </div>
+    </div>
+    <div class="viewer" id="viewer"></div>
+    <p class="zoom-hint" id="zoomHint"></p>` : ""}
+    <div class="nav">
+      <button id="prevBtn" ${prev ? "" : "disabled"}>‹ ${prev ? esc(lessonLabel(prev)) : "Anterior"}</button>
+      <button id="nextBtn" ${next ? "" : "disabled"}>${next ? esc(lessonLabel(next)) : "Siguiente"} ›</button>
+    </div>
+    ${footer()}`;
+
+  $("listenBtn").onclick = () => player.toggle(l);
+  $("prevBtn").onclick = () => prev && (location.hash = lessonHref(prev));
+  $("nextBtn").onclick = () => next && (location.hash = lessonHref(next));
+  if (!amudim.length) return;
+
+  const show = () => (viewMode === "img" ? showImage(l, state.amud) : showText(l, state.amud));
+  $("amudSeg").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.amud = b.dataset.a;
+    $("amudSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+    show();
+  };
+  $("modeSeg").onclick = e => {
+    const b = e.target.closest("button"); if (!b) return;
+    viewMode = b.dataset.m; store.set("dy.view", viewMode);
+    $("modeSeg").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+    show();
+  };
+  show();
+}
+
+function sefRef(l, amud) { return l.mas.sef + " " + amud; }
+
+const imgCache = new Map();
+async function findPageImage(ref) {
+  if (imgCache.has(ref)) return imgCache.get(ref);
+  const res = await fetch(`${SEFARIA}/api/manuscripts/${encodeURIComponent(ref)}`);
+  const list = res.ok ? await res.json() : [];
+  const pick = Array.isArray(list)
+    ? (list.find(x => /vilna/i.test(x.manuscript?.slug || "")) || list.find(x => /bomberg/i.test(x.manuscript?.slug || "")))
+    : null;
+  const out = pick ? { url: pick.image_url, title: /vilna/i.test(pick.manuscript?.slug || "") ? "Edición Vilna (1880–86)" : "Edición Venecia (1523)" } : null;
+  imgCache.set(ref, out);
+  return out;
+}
+
+async function showImage(l, amud) {
+  const v = $("viewer"), hint = $("zoomHint");
+  const ref = sefRef(l, amud);
+  v.className = "viewer" + (zoomed ? " zoomed" : "");
+  v.innerHTML = `<div class="status"><div class="spinner"></div>Cargando página ${esc(amudLabel(amud))}…</div>`;
+  hint.textContent = "";
+  try {
+    const img = await findPageImage(ref);
+    if ($("viewer") !== v || viewMode !== "img") return;
+    if (!img) {
+      v.innerHTML = `<div class="status">No hay imagen de esta página.<br><br><button class="listen-btn" id="toText">Ver el texto</button></div>`;
+      $("toText").onclick = () => $("modeSeg").querySelector('[data-m="text"]').click();
+      return;
+    }
+    v.innerHTML = `<img alt="Página ${esc(ref)}" src="${esc(img.url)}">`;
+    hint.textContent = (zoomed ? "Toca la página para alejar" : "Toca la página para acercar") + " · " + img.title;
+    v.querySelector("img").onclick = () => {
+      zoomed = !zoomed;
+      v.classList.toggle("zoomed", zoomed);
+      hint.textContent = (zoomed ? "Toca la página para alejar" : "Toca la página para acercar") + " · " + img.title;
+    };
+    v.querySelector("img").onerror = () => { v.innerHTML = `<div class="status">No se pudo cargar la imagen.</div>`; };
+  } catch {
+    v.innerHTML = `<div class="status">No se pudo cargar la página. Revisa tu conexión.</div>`;
+  }
+}
+
+const textCache = new Map();
+async function fetchText(ref) {
+  if (textCache.has(ref)) return textCache.get(ref);
+  const res = await fetch(`${SEFARIA}/api/v3/texts/${encodeURIComponent(ref)}?version=hebrew&version=english&return_format=text_only`);
+  if (!res.ok) throw new Error(res.status);
+  const data = await res.json();
+  const he = data.versions?.find(v => v.language === "he");
+  const en = data.versions?.find(v => v.language === "en");
+  const out = { he: flat(he?.text), en: flat(en?.text), heTitle: he?.versionTitle, enTitle: en?.versionTitle };
+  textCache.set(ref, out);
+  return out;
+}
+function flat(t) { return t == null ? [] : Array.isArray(t) ? t.flat(Infinity) : [t]; }
+function cleanText(s) {
+  const d = document.createElement("div");
+  d.innerHTML = String(s);
+  return d.textContent.trim();
+}
+
+async function showText(l, amud) {
+  const v = $("viewer"), hint = $("zoomHint");
+  const ref = sefRef(l, amud);
+  v.className = "viewer";
+  hint.textContent = "";
+  v.innerHTML = `<div class="status"><div class="spinner"></div>Cargando texto…</div>`;
+  try {
+    const t = await fetchText(ref);
+    if ($("viewer") !== v || viewMode !== "text") return;
+    if (!t.he.length) throw new Error("empty");
+    let html = `<div class="text"><div style="display:flex;justify-content:flex-end;margin-bottom:10px">
+      <div class="seg" id="enSeg"><button data-e="0" class="${showEnglish ? "" : "on"}">Arameo</button><button data-e="1" class="${showEnglish ? "on" : ""}">+ Inglés</button></div></div>`;
+    t.he.forEach((seg, i) => {
+      html += `<p class="he">${esc(cleanText(seg))}</p>`;
+      if (showEnglish && t.en[i]) html += `<p class="en">${esc(cleanText(t.en[i]))}</p>`;
+    });
+    html += `<p class="credit">Texto: Sefaria${t.heTitle ? " · " + esc(t.heTitle) : ""}${showEnglish && t.enTitle ? " · " + esc(t.enTitle) : ""}</p></div>`;
+    v.innerHTML = html;
+    $("enSeg").onclick = e => {
+      const b = e.target.closest("button"); if (!b) return;
+      showEnglish = b.dataset.e === "1"; store.set("dy.en", showEnglish);
+      showText(l, amud);
+    };
+  } catch {
+    v.innerHTML = `<div class="status">El texto de esta página no está disponible.</div>`;
+  }
+}
+
+function footer() {
+  return `<p class="foot">Audio: podcast “Marco Kassab – Daf Yomi”.<br>Páginas y texto del Talmud: <a href="https://www.sefaria.org" target="_blank" rel="noopener">Sefaria</a> (edición Vilna).</p>`;
+}
+
+// ---------- player ----------
+const audio = $("audio");
+const SPEEDS = [1, 1.25, 1.5, 1.75, 2, 0.75];
+const player = {
+  current: null,
+  speed: store.get("dy.speed", 1),
+
+  load(l, autoplay) {
+    this.current = l;
+    store.set("dy.last", l.guid);
+    audio.src = l.url;
+    audio.playbackRate = this.speed;
+    const saved = progress[l.guid];
+    const startAt = saved && !saved.done ? saved.t : 0;
+    const seekWhenReady = () => {
+      if (startAt) audio.currentTime = startAt;
+      audio.removeEventListener("loadedmetadata", seekWhenReady);
+    };
+    audio.addEventListener("loadedmetadata", seekWhenReady);
+    $("player").hidden = false;
+    $("pTitle").querySelector("b").textContent = lessonLabel(l);
+    setMediaSession(l);
+    if (autoplay) audio.play().catch(() => {});
+    updateUi();
+  },
+  toggle(l) {
+    if (!this.current || this.current.guid !== l.guid) return this.load(l, true);
+    audio.paused ? audio.play().catch(() => {}) : audio.pause();
+  },
+  skip(sec) { audio.currentTime = Math.max(0, Math.min((audio.duration || 0), audio.currentTime + sec)); },
+  next() {
+    if (!this.current) return;
+    const { next } = neighbors(this.current);
+    if (next) this.load(next, true);
+  },
+  prev() {
+    if (!this.current) return;
+    const { prev } = neighbors(this.current);
+    if (prev) this.load(prev, true);
+  },
+};
+
+$("pPlay").onclick = () => player.current && player.toggle(player.current);
+$("pBack").onclick = () => player.skip(-15);
+$("pFwd").onclick = () => player.skip(30);
+$("pTitle").onclick = () => player.current && (location.hash = lessonHref(player.current));
+$("pSpeed").onclick = () => {
+  const i = SPEEDS.indexOf(player.speed);
+  player.speed = SPEEDS[(i + 1) % SPEEDS.length];
+  audio.playbackRate = player.speed;
+  store.set("dy.speed", player.speed);
+  updateUi();
+};
+let seeking = false;
+$("pSeek").addEventListener("input", () => {
+  seeking = true;
+  $("pCur").textContent = fmt(($("pSeek").value / 1000) * (audio.duration || 0));
+});
+$("pSeek").addEventListener("change", () => {
+  if (audio.duration) audio.currentTime = ($("pSeek").value / 1000) * audio.duration;
+  seeking = false;
+});
+
+let lastSave = 0;
+audio.addEventListener("timeupdate", () => {
+  const l = player.current; if (!l) return;
+  if (!seeking) {
+    $("pCur").textContent = fmt(audio.currentTime);
+    if (audio.duration) $("pSeek").value = Math.round((audio.currentTime / audio.duration) * 1000);
+  }
+  const now = Date.now();
+  if (now - lastSave > 4000) {
+    lastSave = now;
+    const p = progress[l.guid] || {};
+    p.t = audio.currentTime; p.d = audio.duration || l.dur;
+    if (p.d && p.t / p.d > 0.92) p.done = true;
+    progress[l.guid] = p; saveProgress();
+  }
+});
+audio.addEventListener("loadedmetadata", () => { $("pDur").textContent = fmt(audio.duration); });
+audio.addEventListener("ended", () => {
+  const l = player.current; if (!l) return;
+  progress[l.guid] = { t: 0, d: audio.duration, done: true }; saveProgress();
+  updateUi(); render();
+});
+["play", "pause"].forEach(ev => audio.addEventListener(ev, () => { updateUi(); if (ev === "pause" && player.current) {
+  const p = progress[player.current.guid] || {};
+  p.t = audio.currentTime; p.d = audio.duration || player.current.dur;
+  progress[player.current.guid] = p; saveProgress();
+}}));
+
+function updateUi() {
+  $("pPlay").innerHTML = audio.paused ? ICONS.play : ICONS.pause;
+  $("pPlay").setAttribute("aria-label", audio.paused ? "Reproducir" : "Pausar");
+  $("pSpeed").textContent = player.speed + "×";
+  const lb = $("listenBtn");
+  const r = route();
+  if (lb && r.view === "lesson" && player.current?.guid === r.id) {
+    lb.innerHTML = audio.paused ? ICONS.play + "Continuar clase" : ICONS.pause + "Pausar clase";
+  }
+  bindPlayButtons();
+}
+
+function setMediaSession(l) {
+  if (!("mediaSession" in navigator)) return;
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: lessonLabel(l),
+    artist: "Marco Kassab · Daf Yomi",
+    album: l.mas ? "Masejet " + l.mas.name : "Daf Yomi",
+    artwork: [{ src: "icon-512.png", sizes: "512x512", type: "image/png" }],
+  });
+  const ms = navigator.mediaSession;
+  const set = (a, fn) => { try { ms.setActionHandler(a, fn); } catch {} };
+  set("play", () => audio.play());
+  set("pause", () => audio.pause());
+  set("seekbackward", () => player.skip(-15));
+  set("seekforward", () => player.skip(30));
+  set("nexttrack", () => player.next());
+  set("previoustrack", () => player.prev());
+}
+
+// Restore the last lesson in the mini player (paused) so it's one tap away.
+function restoreLast() {
+  const g = store.get("dy.last", null);
+  const l = g && byGuid.get(g);
+  if (l && !player.current) {
+    player.current = l;
+    audio.src = l.url;
+    audio.playbackRate = player.speed;
+    const saved = progress[l.guid];
+    if (saved && !saved.done && saved.t) {
+      audio.addEventListener("loadedmetadata", function f() { audio.currentTime = saved.t; audio.removeEventListener("loadedmetadata", f); });
+      $("pCur").textContent = fmt(saved.t);
+      if (saved.d) { $("pDur").textContent = fmt(saved.d); $("pSeek").value = Math.round(saved.t / saved.d * 1000); }
+    }
+    $("player").hidden = false;
+    $("pTitle").querySelector("b").textContent = lessonLabel(l);
+    setMediaSession(l);
+    updateUi();
+  }
+}
+
+if ("serviceWorker" in navigator && location.protocol === "https:") {
+  navigator.serviceWorker.register("sw.js").catch(() => {});
+}
+
+loadFeed(false).then(restoreLast);
+</script>
+</body>
+</html>

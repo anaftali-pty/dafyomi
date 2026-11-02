@@ -1,0 +1,16 @@
+{
+  "name": "Daf Yomi – Marco Kassab",
+  "short_name": "Daf Yomi",
+  "description": "Las clases del Daf Yomi en español, por masejet, con la página del daf.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f3ec",
+  "theme_color": "#1d3557",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
