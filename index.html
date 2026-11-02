@@ -340,7 +340,11 @@ function parseTitle(title) {
       amudim.push(d + a);
     }
   }
-  return { mas, daf: sDaf, endDaf: eDaf, amudim };
+  // Classes almost always run a little into the next amud, so it gets its own tab too.
+  const last = amudim[amudim.length - 1];
+  const nextAmud = last.endsWith("a") ? parseInt(last) + "b" : (parseInt(last) + 1) + "a";
+  const next = parseInt(nextAmud) <= mas.last ? nextAmud : null;
+  return { mas, daf: sDaf, endDaf: eDaf, amudim, next };
 }
 
 function parseFeed(xmlText) {
@@ -445,6 +449,8 @@ function dafRange(l) {
   if (whole) return l.daf + "–" + l.endDaf;
   return first + (a.length > 1 ? "–" + last : "");
 }
+// Amudim shown on the lesson page: the lesson's own plus the one it runs into.
+function pageAmudim(l) { return [...(l.amudim || []), ...(l.next ? [l.next] : [])]; }
 function amudLabel(a) { return a.slice(0, -1) + (a.endsWith("a") ? "a" : "b"); }
 function isDone(l) { return !!progress[l.guid]?.done; }
 function isPartial(l) { const p = progress[l.guid]; return p && !p.done && p.t > 30; }
@@ -600,7 +606,7 @@ function renderLesson(l) {
   if (!l) { location.hash = "#/"; return; }
   $("topTitle").textContent = lessonLabel(l);
   const { prev, next } = neighbors(l);
-  const amudim = l.amudim || [];
+  const amudim = pageAmudim(l);
   const state = { amud: amudim[0] };
   const playing = player.current?.guid === l.guid && !audio.paused;
 
@@ -792,7 +798,7 @@ async function downloadLesson(l) {
   let bytes = 0, hasAudio = false;
   try {
     navigator.storage?.persist?.().catch(() => {});
-    for (const a of l.amudim || []) {
+    for (const a of pageAmudim(l)) {
       const ref = sefRef(l, a);
       for (const u of [manuscriptsUrl(ref), textUrl(ref)]) {
         const r = await fetch(u);
@@ -834,7 +840,7 @@ async function removeDownload(l) {
   const c = await openOfflineCache();
   if (c) {
     await c.delete(audioKey(l));
-    for (const a of l.amudim || []) {
+    for (const a of pageAmudim(l)) {
       const ref = sefRef(l, a);
       const img = await findPageImage(ref).catch(() => null);
       if (img) await c.delete(img.url);
@@ -1017,5 +1023,6 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
 
 loadFeed(false).then(prepareOfflineAudio).then(restoreLast);
 </script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "a71558da987c4bf0957953995878a922"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
