@@ -1,6 +1,6 @@
 // Keeps the app shell available offline. Network first, so updates show up right away;
 // the feed, audio and Sefaria requests are cross-origin and are left to the browser.
-const CACHE = "dafyomi-v1";
+const CACHE = "dafyomi-v2";
 const SHELL = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
